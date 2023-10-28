@@ -10,7 +10,6 @@ class ProdutoSchema(BaseModel):
     descricao: str = (
         "Protege financeiramente a sua família em caso de morte por qualquer causa."
     )
-    detalhes: list[str] = ["Detalhe 1", "Detalhe 2", "Detalhe 3"]
 
 
 class ListagemProdutosSchema(BaseModel):
