@@ -1,16 +1,24 @@
-from flask_openapi3 import OpenAPI, Info, Tag
 from flask import redirect
-
-from model.database import db_session
-
-from model import Produto
-from schemas import ListagemProdutosSchema, ErrorSchema
-from schemas.produto import apresenta_produtos
 from flask_cors import CORS
+from flask_openapi3 import Info, OpenAPI, Tag
+from sqlalchemy_utils import database_exists
+
+from model import Produto, db
+from model.database import init_db
+from schemas import ErrorSchema, ListagemProdutosSchema
+from schemas.produto import apresenta_produtos
 
 info = Info(title="Minha API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
 CORS(app)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
+# initialize the app with the extension
+db.init_app(app)
+
+if not database_exists(app.config["SQLALCHEMY_DATABASE_URI"]):
+    with app.app_context():
+        init_db(db)
 
 # definindo tags
 home_tag = Tag(
@@ -20,11 +28,6 @@ home_tag = Tag(
 produto_tag = Tag(
     name="Produto", description="Adição, visualização e remoção de produtos à base"
 )
-
-
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
 
 
 @app.get("/", tags=[home_tag])
@@ -44,7 +47,7 @@ def get_produtos():
     Retorna uma representação da listagem de produtos.
     """
     # fazendo a busca
-    produtos = Produto.query.all()
+    produtos = db.session.execute(db.select(Produto)).scalars()
 
     if not produtos:
         # se não há produtos cadastrados

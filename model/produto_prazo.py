@@ -1,10 +1,10 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from model.database import Base
+from model.database import db
 
 
-class ProdutoPrazo(Base):
+class ProdutoPrazo(db.Model):
     __tablename__ = "produtoprazo"
     produtoId: Mapped[int] = mapped_column(
         ForeignKey("produto.produtoId"), primary_key=True

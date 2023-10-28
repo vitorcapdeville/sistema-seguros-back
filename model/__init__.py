@@ -5,8 +5,7 @@ from model.produto_prazo import ProdutoPrazo
 from model.produto_tabua import ProdutoTabua
 from model.segurado import Segurado
 from model.tabua import Tabua
-from model.database import engine, init_db
-from sqlalchemy_utils import database_exists
+from model.database import db
 
 __all__ = [
     "Produto",
@@ -16,7 +15,5 @@ __all__ = [
     "ProdutoTabua",
     "Segurado",
     "Tabua",
+    "db",
 ]
-
-if not database_exists(engine.url):
-    init_db()

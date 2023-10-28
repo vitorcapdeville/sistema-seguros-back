@@ -1,22 +1,23 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker, declarative_base
 from datetime import date
 
-engine = create_engine("sqlite:///database/db.sqlite3")
-db_session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=engine)
-)
-Base = declarative_base()
-Base.query = db_session.query_property()
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 
 
-def init_db():
+class Base(DeclarativeBase):
+    pass
+
+
+db = SQLAlchemy(model_class=Base)
+
+
+def init_db(db):
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
     import model
 
-    Base.metadata.create_all(bind=engine)
+    db.create_all()
 
     segurado = model.Segurado(
         cpf=12345678900, sexo="M", dataNascimento=date(1990, 1, 1)
@@ -93,17 +94,17 @@ def init_db():
         ),
     ]
 
-    db_session.add(segurado)
-    db_session.commit()
-    db_session.add_all(produtos)
-    db_session.commit()
-    db_session.add_all(tabuas)
-    db_session.commit()
-    db_session.add_all(produto_tabua)
-    db_session.commit()
-    db_session.add_all(juros)
-    db_session.commit()
-    db_session.add_all(produto_prazo)
-    db_session.commit()
-    db_session.add_all(matricula)
-    db_session.commit()
+    db.session.add(segurado)
+    db.session.commit()
+    db.session.add_all(produtos)
+    db.session.commit()
+    db.session.add_all(tabuas)
+    db.session.commit()
+    db.session.add_all(produto_tabua)
+    db.session.commit()
+    db.session.add_all(juros)
+    db.session.commit()
+    db.session.add_all(produto_prazo)
+    db.session.commit()
+    db.session.add_all(matricula)
+    db.session.commit()

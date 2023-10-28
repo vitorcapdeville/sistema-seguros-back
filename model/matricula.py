@@ -2,11 +2,11 @@ from datetime import date
 from sqlalchemy import ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from model.database import Base
+from model.database import db
 from model.produto_prazo import ProdutoPrazo
 
 
-class Matricula(Base):
+class Matricula(db.Model):
     __tablename__ = "matricula"
     matriculaId: Mapped[int] = mapped_column(primary_key=True)
     cpfSegurado: Mapped[int] = mapped_column(ForeignKey("segurado.cpf"))
