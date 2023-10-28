@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../sistema-seguros-front"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "sistema-seguros-front"
+	}
+}
