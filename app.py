@@ -16,8 +16,10 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
 # initialize the app with the extension
 db.init_app(app)
 
-if not database_exists(app.config["SQLALCHEMY_DATABASE_URI"]):
-    with app.app_context():
+# db.engine.url
+with app.app_context():
+    if not database_exists(db.engine.url):
+        print("Inicializando o banco de dados.")
         init_db(db)
 
 # definindo tags
