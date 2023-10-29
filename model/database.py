@@ -56,21 +56,11 @@ def init_db(db):
     ]
 
     produto_prazo = [
-        model.ProdutoPrazo(
-            produtoId=1, prazoPagamento=10, prazoCobertura=10, jurosId=1
-        ),
-        model.ProdutoPrazo(
-            produtoId=1, prazoPagamento=20, prazoCobertura=20, jurosId=2
-        ),
-        model.ProdutoPrazo(
-            produtoId=1, prazoPagamento=30, prazoCobertura=30, jurosId=3
-        ),
-        model.ProdutoPrazo(
-            produtoId=2, prazoPagamento=15, prazoCobertura=15, jurosId=1
-        ),
-        model.ProdutoPrazo(
-            produtoId=2, prazoPagamento=30, prazoCobertura=30, jurosId=3
-        ),
+        model.ProdutoPrazo(produtoId=1, prazo=10, jurosId=1),
+        model.ProdutoPrazo(produtoId=1, prazo=20, jurosId=2),
+        model.ProdutoPrazo(produtoId=1, prazo=30, jurosId=3),
+        model.ProdutoPrazo(produtoId=2, prazo=15, jurosId=1),
+        model.ProdutoPrazo(produtoId=2, prazo=30, jurosId=3),
     ]
 
     matricula = [

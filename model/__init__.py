@@ -1,11 +1,9 @@
-from model.produto import Produto
+from model.database import db
 from model.juros import Juros
 from model.matricula import Matricula
-from model.produto_prazo import ProdutoPrazo
-from model.produto_tabua import ProdutoTabua
+from model.produto import Produto, ProdutoPrazo, ProdutoTabua
 from model.segurado import Segurado
 from model.tabua import Tabua
-from model.database import db
 
 __all__ = [
     "Produto",

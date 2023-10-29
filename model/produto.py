@@ -1,6 +1,6 @@
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from model.database import db
 
 
@@ -9,3 +9,27 @@ class Produto(db.Model):
     produtoId: Mapped[int] = mapped_column(primary_key=True)
     nome: Mapped[str] = mapped_column(String(50))
     descricao: Mapped[str] = mapped_column(String(100))
+
+    produtoPrazos: Mapped[list["ProdutoPrazo"]] = relationship(
+        back_populates="produto", cascade="all, delete-orphan"
+    )
+
+
+class ProdutoPrazo(db.Model):
+    __tablename__ = "produtoprazo"
+    produtoId: Mapped[int] = mapped_column(
+        ForeignKey("produto.produtoId"), primary_key=True
+    )
+    prazo: Mapped[int] = mapped_column(primary_key=True)
+    jurosId: Mapped[int] = mapped_column(ForeignKey("juros.jurosId"))
+
+    produto: Mapped["Produto"] = relationship(back_populates="produtoPrazos")
+
+
+class ProdutoTabua(db.Model):
+    __tablename__ = "produtotabua"
+    produtoId: Mapped[int] = mapped_column(
+        ForeignKey("produto.produtoId"), primary_key=True
+    )
+    sexo: Mapped[str] = mapped_column(String(1), primary_key=True)
+    tabuaId: Mapped[int] = mapped_column(ForeignKey("tabua.tabuaId"))

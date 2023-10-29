@@ -3,7 +3,7 @@ from sqlalchemy import ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from model.database import db
-from model.produto_prazo import ProdutoPrazo
+from model.produto import ProdutoPrazo
 
 
 class Matricula(db.Model):
@@ -21,8 +21,8 @@ class Matricula(db.Model):
             [produtoId, prazoPagamento, prazoCobertura],
             [
                 ProdutoPrazo.produtoId,
-                ProdutoPrazo.prazoPagamento,
-                ProdutoPrazo.prazoCobertura,
+                ProdutoPrazo.prazo,
+                ProdutoPrazo.prazo,
             ],
         ),
     )

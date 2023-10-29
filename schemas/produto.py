@@ -32,3 +32,11 @@ def apresenta_produtos(produtos: list[Produto]):
         )
 
     return ListagemProdutosSchema(produtos=result).model_dump()
+
+
+class ProdutoBuscaSchema(BaseModel):
+    """Define como deve ser a estrutura que representa a busca, que será
+    feita apenas com base no nome do produto.
+    """
+
+    nome: str = "Teste"
