@@ -6,6 +6,7 @@ from model.produto import Produto
 class ProdutoSchema(BaseModel):
     """Define como um produto será retornado"""
 
+    id: int = 0
     nome: str = "Pecúlio por Morte"
     descricao: str = (
         "Protege financeiramente a sua família em caso de morte por qualquer causa."
@@ -26,6 +27,7 @@ def apresenta_produtos(produtos: list[Produto]):
     for produto in produtos:
         result.append(
             {
+                "id": produto.produtoId,
                 "nome": produto.nome,
                 "descricao": produto.descricao,
             }

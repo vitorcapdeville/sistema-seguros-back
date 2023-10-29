@@ -1,18 +1,22 @@
 from flask import redirect
 from flask_cors import CORS
 from flask_openapi3 import Info, OpenAPI, Tag
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import database_exists
 
 from model import Produto, ProdutoPrazo, db
 from model.database import init_db
+from model.segurado import Matricula
+from model.segurado import Segurado
 from schemas import (
     ErrorSchema,
-    ListagemProdutosSchema,
     ListagemPrazosSchema,
+    ListagemProdutosSchema,
     ProdutoBuscaSchema,
 )
-from schemas.produto import apresenta_produtos
+from schemas.cliente import ClienteSchema, apresenta_cliente
 from schemas.prazo import apresenta_prazos
+from schemas.produto import apresenta_produtos
 
 info = Info(title="Minha API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
@@ -37,6 +41,10 @@ produto_tag = Tag(name="Produto", description="Consulta de produtos.")
 prazos_tag = Tag(
     name="Prazos",
     description="Consulta de prazos de pagamento e de cobertura de produtos.",
+)
+contratar_tag = Tag(
+    name="Contratar",
+    description="Realiza o cadastro de um novo cliente.",
 )
 
 
@@ -84,3 +92,46 @@ def get_prazos(query: ProdutoBuscaSchema):
         return {"prazos": []}, 200
     else:
         return apresenta_prazos(prazos), 200
+
+
+@app.post(
+    "/contratar",
+    tags=[contratar_tag],
+    responses={"200": ClienteSchema, "409": ErrorSchema, "400": ErrorSchema},
+)
+def add_cliente(form: ClienteSchema):
+    """Adiciona um novo cliente à base de dados
+
+    Retorna as informações do cliente adicionado.
+    """
+    segurado = db.session.query(Segurado).filter_by(cpf=form.cpf).first()
+    if not segurado:
+        segurado = Segurado(
+            cpf=form.cpf,
+            sexo=form.sexo,
+            dataNascimento=form.data_nascimento,
+        )
+        db.session.add(segurado)
+
+    cliente = Matricula(
+        cpfSegurado=form.cpf,
+        produtoId=form.produto_id,
+        dataAssinatura=form.data_assinatura,
+        prazoPagamento=form.prazo,
+        prazoCobertura=form.prazo,
+    )
+    try:
+        db.session.add(cliente)
+        db.session.commit()
+        return apresenta_cliente(form), 200
+
+    except IntegrityError as e:
+        # como a duplicidade do nome é a provável razão do IntegrityError
+        error_msg = "Cliente já existe na base."
+        return {"mesage": error_msg}, 409
+
+    except Exception as e:
+        # caso um erro fora do previsto
+        error_msg = "Não foi possível salvar novo cliente."
+        print(e)
+        return {"mesage": error_msg}, 400

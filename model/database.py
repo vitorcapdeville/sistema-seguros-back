@@ -69,23 +69,23 @@ def init_db(db):
             cpfSegurado=12345678900,
             produtoId=1,
             dataAssinatura=date(2020, 1, 1),
-            dataInicioVigencia=date(2020, 2, 1),
             prazoCobertura=10,
             prazoPagamento=10,
+            segurado=segurado,
         ),
         model.Matricula(
             matriculaId=2,
             cpfSegurado=12345678900,
             produtoId=2,
             dataAssinatura=date(2020, 1, 1),
-            dataInicioVigencia=date(2020, 2, 1),
             prazoCobertura=15,
             prazoPagamento=15,
+            segurado=segurado,
         ),
     ]
 
-    db.session.add(segurado)
-    db.session.commit()
+    # db.session.add(segurado)
+    # db.session.commit()
     db.session.add_all(produtos)
     db.session.commit()
     db.session.add_all(tabuas)
