@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 from model.produto import Produto
 
@@ -13,10 +13,10 @@ class ProdutoSchema(BaseModel):
     )
 
 
-class ListagemProdutosSchema(BaseModel):
+class ListagemProdutosSchema(RootModel):
     """Define como uma listagem de produtos será retornada."""
 
-    produtos: list[ProdutoSchema]
+    root: list[ProdutoSchema]
 
 
 def apresenta_produtos(produtos: list[Produto]):
@@ -33,7 +33,7 @@ def apresenta_produtos(produtos: list[Produto]):
             }
         )
 
-    return ListagemProdutosSchema(produtos=result).model_dump()
+    return ListagemProdutosSchema(result).model_dump()
 
 
 class ProdutoBuscaSchema(BaseModel):
