@@ -24,6 +24,7 @@ class ProdutoPrazo(db.Model):
     jurosId: Mapped[int] = mapped_column(ForeignKey("juros.jurosId"))
 
     produto: Mapped["Produto"] = relationship(back_populates="produtoPrazos")
+    juros: Mapped["Juros"] = relationship()
 
 
 class ProdutoTabua(db.Model):
@@ -32,4 +33,14 @@ class ProdutoTabua(db.Model):
         ForeignKey("produto.produtoId"), primary_key=True
     )
     sexo: Mapped[str] = mapped_column(String(1), primary_key=True)
-    tabuaId: Mapped[int] = mapped_column(ForeignKey("tabua.tabuaId"))
+    tabuaId: Mapped[int] = mapped_column(ForeignKey("tabua.id"))
+
+
+class Juros(db.Model):
+    __tablename__ = "juros"
+    jurosId: Mapped[int] = mapped_column(primary_key=True)
+    juros: Mapped[float] = mapped_column()
+
+    produtoPrazos: Mapped[list["ProdutoPrazo"]] = relationship(
+        back_populates="juros", cascade="all, delete-orphan"
+    )

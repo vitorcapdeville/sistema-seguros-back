@@ -24,17 +24,15 @@ class Matricula(db.Model):
     cpfSegurado: Mapped[int] = mapped_column(ForeignKey("segurado.cpf"))
     produtoId: Mapped[int] = mapped_column(ForeignKey("produto.produtoId"))
     dataAssinatura: Mapped[date]
-    prazoPagamento: Mapped[int] = mapped_column()
-    prazoCobertura: Mapped[int] = mapped_column()
+    prazo: Mapped[int] = mapped_column()
 
     segurado: Mapped["Segurado"] = relationship(back_populates="matricula")
 
     __table_args__ = (
         ForeignKeyConstraint(
-            [produtoId, prazoPagamento, prazoCobertura],
+            [produtoId, prazo],
             [
                 ProdutoPrazo.produtoId,
-                ProdutoPrazo.prazo,
                 ProdutoPrazo.prazo,
             ],
         ),

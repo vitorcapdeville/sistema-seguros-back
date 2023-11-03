@@ -1,22 +1,37 @@
+from datetime import date
+import tabatu as tb
 from flask import redirect
 from flask_cors import CORS
 from flask_openapi3 import Info, OpenAPI, Tag
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import database_exists
 
-from model import Produto, ProdutoPrazo, db
+from model import (
+    Juros,
+    Matricula,
+    Produto,
+    ProdutoPrazo,
+    ProdutoTabua,
+    Segurado,
+    Tabua,
+    Taxa,
+    db,
+)
 from model.database import init_db
-from model.segurado import Matricula
-from model.segurado import Segurado
 from schemas import (
     ErrorSchema,
+    InputSimulacaoSchema,
     ListagemPrazosSchema,
     ListagemProdutosSchema,
     ProdutoBuscaSchema,
+    ResultadoSimulacaoSchema,
+    ClienteSchema,
+    apresenta_cliente,
+    apresenta_prazos,
+    apresenta_produtos,
 )
-from schemas.cliente import ClienteSchema, apresenta_cliente
-from schemas.prazo import apresenta_prazos
-from schemas.produto import apresenta_produtos
+
+from src.produtos.peculio import peculio_capitalizado_fluxo
 
 info = Info(title="Minha API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
@@ -88,7 +103,6 @@ def get_prazos(query: ProdutoBuscaSchema):
     )
     prazos = db.session.execute(query).scalars()
     if not prazos:
-        # se não há produtos cadastrados
         return {"prazos": []}, 200
     else:
         return apresenta_prazos(prazos), 200
@@ -135,3 +149,47 @@ def add_cliente(form: ClienteSchema):
         error_msg = "Não foi possível salvar novo cliente."
         print(e)
         return {"mesage": error_msg}, 400
+
+
+@app.get(
+    "/simular",
+    tags=[prazos_tag],
+    responses={"200": ResultadoSimulacaoSchema, "404": ErrorSchema},
+)
+def get_simulacao(query: InputSimulacaoSchema):
+    query_juros = (
+        db.select(Juros.juros)
+        .join(Juros.produtoPrazos)
+        .where(ProdutoPrazo.produtoId == query.produto_id)
+        .where(ProdutoPrazo.prazo == query.prazo)
+    )
+
+    query_taxa = (
+        db.select(Taxa.taxa)
+        .join(Tabua, Taxa.tabuaId == Tabua.id)
+        .join(ProdutoTabua, ProdutoTabua.tabuaId == Tabua.id)
+        .where(ProdutoTabua.produtoId == query.produto_id)
+        .where(ProdutoTabua.sexo == query.sexo)
+    )
+
+    try:
+        juros = db.session.execute(query_juros).scalars().one()
+        taxa = db.session.execute(query_taxa).scalars().all()
+        produto = peculio_capitalizado_fluxo(
+            tabua_beneficio=tb.Tabua(taxa),
+            tabua_pagamento=tb.Tabua(taxa),
+            juros=tb.JurosConstante(juros),
+            data_assinatura=date.today(),
+            data_nascimento_segurado=query.data_nascimento,
+            prazo_cobertura=query.prazo,
+            prazo_pagamento=query.prazo,
+            beneficio=1000000,
+            percentual_beneficio=[1.0],
+        )
+    except Exception as e:
+        print(e)
+        return {"mesage": "Não foi possível realizar a simulação."}, 400
+    return (
+        ResultadoSimulacaoSchema(premio=produto.premio_comercial(0)).model_dump(),
+        200,
+    )

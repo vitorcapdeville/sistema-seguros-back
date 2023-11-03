@@ -1,9 +1,7 @@
 from model.database import db
-from model.juros import Juros
-from model.segurado import Matricula
-from model.produto import Produto, ProdutoPrazo, ProdutoTabua
-from model.segurado import Segurado
-from model.tabua import Tabua
+from model.produto import Produto, ProdutoPrazo, ProdutoTabua, Juros
+from model.segurado import Matricula, Segurado
+from model.tabua import Tabua, Taxa
 
 __all__ = [
     "Produto",
@@ -13,5 +11,6 @@ __all__ = [
     "ProdutoTabua",
     "Segurado",
     "Tabua",
+    "Taxa",
     "db",
 ]
