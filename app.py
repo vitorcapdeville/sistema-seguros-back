@@ -95,11 +95,10 @@ def get_produtos():
     responses={"200": ListagemPrazosSchema, "404": ErrorSchema},
 )
 def get_prazos(query: ProdutoBuscaSchema):
-    produto_nome = query.nome
     query = (
         db.select(ProdutoPrazo)
         .join(ProdutoPrazo.produto)
-        .where(Produto.nome == produto_nome)
+        .where(Produto.produtoId == query.produto_id)
     )
     prazos = db.session.execute(query).scalars()
     if not prazos:

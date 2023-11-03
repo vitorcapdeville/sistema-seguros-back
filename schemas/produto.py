@@ -41,4 +41,4 @@ class ProdutoBuscaSchema(BaseModel):
     feita apenas com base no nome do produto.
     """
 
-    nome: str = "Teste"
+    produto_id: int = 1
