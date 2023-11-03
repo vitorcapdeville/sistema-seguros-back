@@ -31,7 +31,42 @@ def init_db(db):
         ),
         model.Produto(
             produtoId=2,
-            nome="Outro peculio por morte",
+            nome="Peculio por morte com DPI",
+            descricao="Garante uma indenização em caso de morte, e possui dispensa de pagamento de prêmio por invalidez.",
+        ),
+        model.Produto(
+            produtoId=3,
+            nome="Peculio por invalidez",
+            descricao="Garante uma indenização em caso de invalidez.",
+        ),
+        model.Produto(
+            produtoId=4,
+            nome="Peculio por morte",
+            descricao="Protege financeiramente a sua família em caso de morte por qualquer causa.",
+        ),
+        model.Produto(
+            produtoId=5,
+            nome="Peculio por morte com DPI",
+            descricao="Garante uma indenização em caso de morte, e possui dispensa de pagamento de prêmio por invalidez.",
+        ),
+        model.Produto(
+            produtoId=6,
+            nome="Peculio por invalidez",
+            descricao="Garante uma indenização em caso de invalidez.",
+        ),
+        model.Produto(
+            produtoId=7,
+            nome="Peculio por morte",
+            descricao="Protege financeiramente a sua família em caso de morte por qualquer causa.",
+        ),
+        model.Produto(
+            produtoId=8,
+            nome="Peculio por morte com DPI",
+            descricao="Garante uma indenização em caso de morte, e possui dispensa de pagamento de prêmio por invalidez.",
+        ),
+        model.Produto(
+            produtoId=9,
+            nome="Peculio por invalidez",
             descricao="Garante uma indenização em caso de invalidez.",
         ),
     ]
@@ -40,6 +75,7 @@ def init_db(db):
         model.Tabua(tabuaId=1, nome="AT-2000", tipo="Morte"),
         model.Tabua(tabuaId=2, nome="BREMS MT M", tipo="Morte"),
         model.Tabua(tabuaId=3, nome="BREMS MT F", tipo="Morte"),
+        model.Tabua(tabuaId=4, nome="Alvaro Vindas", tipo="Invalidez"),
     ]
 
     produto_tabua = [
@@ -47,6 +83,20 @@ def init_db(db):
         model.ProdutoTabua(produtoId=1, sexo="F", tabuaId=1),
         model.ProdutoTabua(produtoId=2, sexo="M", tabuaId=2),
         model.ProdutoTabua(produtoId=2, sexo="F", tabuaId=3),
+        model.ProdutoTabua(produtoId=3, sexo="M", tabuaId=4),
+        model.ProdutoTabua(produtoId=3, sexo="F", tabuaId=4),
+        model.ProdutoTabua(produtoId=4, sexo="M", tabuaId=1),
+        model.ProdutoTabua(produtoId=4, sexo="F", tabuaId=1),
+        model.ProdutoTabua(produtoId=5, sexo="M", tabuaId=2),
+        model.ProdutoTabua(produtoId=5, sexo="F", tabuaId=3),
+        model.ProdutoTabua(produtoId=6, sexo="M", tabuaId=4),
+        model.ProdutoTabua(produtoId=6, sexo="F", tabuaId=4),
+        model.ProdutoTabua(produtoId=7, sexo="M", tabuaId=1),
+        model.ProdutoTabua(produtoId=7, sexo="F", tabuaId=1),
+        model.ProdutoTabua(produtoId=8, sexo="M", tabuaId=2),
+        model.ProdutoTabua(produtoId=8, sexo="F", tabuaId=3),
+        model.ProdutoTabua(produtoId=9, sexo="M", tabuaId=4),
+        model.ProdutoTabua(produtoId=9, sexo="F", tabuaId=4),
     ]
 
     juros = [
@@ -61,6 +111,22 @@ def init_db(db):
         model.ProdutoPrazo(produtoId=1, prazo=30, jurosId=3),
         model.ProdutoPrazo(produtoId=2, prazo=15, jurosId=1),
         model.ProdutoPrazo(produtoId=2, prazo=30, jurosId=3),
+        model.ProdutoPrazo(produtoId=3, prazo=5, jurosId=1),
+        model.ProdutoPrazo(produtoId=3, prazo=10, jurosId=1),
+        model.ProdutoPrazo(produtoId=4, prazo=10, jurosId=1),
+        model.ProdutoPrazo(produtoId=4, prazo=20, jurosId=2),
+        model.ProdutoPrazo(produtoId=4, prazo=30, jurosId=3),
+        model.ProdutoPrazo(produtoId=5, prazo=15, jurosId=1),
+        model.ProdutoPrazo(produtoId=5, prazo=30, jurosId=3),
+        model.ProdutoPrazo(produtoId=6, prazo=5, jurosId=1),
+        model.ProdutoPrazo(produtoId=6, prazo=10, jurosId=1),
+        model.ProdutoPrazo(produtoId=7, prazo=10, jurosId=1),
+        model.ProdutoPrazo(produtoId=7, prazo=20, jurosId=2),
+        model.ProdutoPrazo(produtoId=7, prazo=30, jurosId=3),
+        model.ProdutoPrazo(produtoId=8, prazo=15, jurosId=1),
+        model.ProdutoPrazo(produtoId=8, prazo=30, jurosId=3),
+        model.ProdutoPrazo(produtoId=9, prazo=5, jurosId=1),
+        model.ProdutoPrazo(produtoId=9, prazo=10, jurosId=1),
     ]
 
     matricula = [
