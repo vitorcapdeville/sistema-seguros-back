@@ -12,15 +12,21 @@ db = SQLAlchemy(model_class=Base)
 
 
 def init_db(db):
-    # import all modules here that might define models so that
-    # they will be registered properly on the metadata.  Otherwise
-    # you will have to import them first before calling init_db()
     import model
 
     db.create_all()
 
+    formulas = [
+        model.Formula(formulaId=1, nome="peculio"),
+        model.Formula(formulaId=2, nome="aposentadoria"),
+    ]
+
     segurado = model.Segurado(
-        cpf=12345678900, sexo="M", dataNascimento=date(1990, 1, 1)
+        cpf=12345678900,
+        sexo="M",
+        dataNascimento=date(1990, 1, 1),
+        # nome="Jose da Silva",
+        # email="jose@email.com",
     )
 
     produtos = [
@@ -28,46 +34,55 @@ def init_db(db):
             produtoId=1,
             nome="Peculio por morte",
             descricao="Protege financeiramente a sua família em caso de morte por qualquer causa.",
+            formulaId=1,
         ),
         model.Produto(
             produtoId=2,
             nome="Peculio por morte com DPI",
             descricao="Garante uma indenização em caso de morte, e possui dispensa de pagamento de prêmio por invalidez.",
+            formulaId=1,
         ),
         model.Produto(
             produtoId=3,
             nome="Peculio por invalidez",
             descricao="Garante uma indenização em caso de invalidez.",
+            formulaId=1,
         ),
         model.Produto(
             produtoId=4,
             nome="Peculio por morte",
             descricao="Protege financeiramente a sua família em caso de morte por qualquer causa.",
+            formulaId=1,
         ),
         model.Produto(
             produtoId=5,
             nome="Peculio por morte com DPI",
             descricao="Garante uma indenização em caso de morte, e possui dispensa de pagamento de prêmio por invalidez.",
+            formulaId=1,
         ),
         model.Produto(
             produtoId=6,
             nome="Peculio por invalidez",
             descricao="Garante uma indenização em caso de invalidez.",
+            formulaId=1,
         ),
         model.Produto(
             produtoId=7,
-            nome="Peculio por morte",
-            descricao="Protege financeiramente a sua família em caso de morte por qualquer causa.",
+            nome="Aposentadoria",
+            descricao="Garante a manutenção da sua qualidade de vida ao se aposentar.",
+            formulaId=2,
         ),
         model.Produto(
             produtoId=8,
             nome="Peculio por morte com DPI",
             descricao="Garante uma indenização em caso de morte, e possui dispensa de pagamento de prêmio por invalidez.",
+            formulaId=1,
         ),
         model.Produto(
             produtoId=9,
             nome="Peculio por invalidez",
             descricao="Garante uma indenização em caso de invalidez.",
+            formulaId=1,
         ),
     ]
 
@@ -664,13 +679,19 @@ def init_db(db):
         model.ProdutoPrazo(produtoId=5, prazo=30, jurosId=3),
         model.ProdutoPrazo(produtoId=6, prazo=5, jurosId=1),
         model.ProdutoPrazo(produtoId=6, prazo=10, jurosId=1),
-        model.ProdutoPrazo(produtoId=7, prazo=10, jurosId=1),
-        model.ProdutoPrazo(produtoId=7, prazo=20, jurosId=2),
-        model.ProdutoPrazo(produtoId=7, prazo=30, jurosId=3),
+        model.ProdutoPrazo(produtoId=7, prazo=30, jurosId=1),
+        model.ProdutoPrazo(produtoId=7, prazo=40, jurosId=2),
+        model.ProdutoPrazo(produtoId=7, prazo=50, jurosId=3),
         model.ProdutoPrazo(produtoId=8, prazo=15, jurosId=1),
         model.ProdutoPrazo(produtoId=8, prazo=30, jurosId=3),
         model.ProdutoPrazo(produtoId=9, prazo=5, jurosId=1),
         model.ProdutoPrazo(produtoId=9, prazo=10, jurosId=1),
+    ]
+
+    produto_prazo_renda = [
+        model.ProdutoPrazoRenda(produtoId=7, prazo=30, prazoCerto=0),
+        model.ProdutoPrazoRenda(produtoId=7, prazo=30, prazoCerto=5),
+        model.ProdutoPrazoRenda(produtoId=7, prazo=30, prazoCerto=10),
     ]
 
     matricula = [
@@ -680,6 +701,8 @@ def init_db(db):
             produtoId=1,
             dataAssinatura=date(2020, 1, 1),
             prazo=10,
+            prazoRenda=None,
+            prazoCertoRenda=None,
             segurado=segurado,
         ),
         model.Matricula(
@@ -688,10 +711,14 @@ def init_db(db):
             produtoId=2,
             dataAssinatura=date(2020, 1, 1),
             prazo=15,
+            prazoRenda=None,
+            prazoCertoRenda=None,
             segurado=segurado,
         ),
     ]
 
+    db.session.add_all(formulas)
+    db.session.commit()
     db.session.add_all(produtos)
     db.session.commit()
     db.session.add_all(tabuas)
@@ -703,4 +730,6 @@ def init_db(db):
     db.session.add_all(produto_prazo)
     db.session.commit()
     db.session.add_all(matricula)
+    db.session.commit()
+    db.session.add_all(produto_prazo_renda)
     db.session.commit()

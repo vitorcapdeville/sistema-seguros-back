@@ -25,6 +25,8 @@ class Matricula(db.Model):
     produtoId: Mapped[int] = mapped_column(ForeignKey("produto.produtoId"))
     dataAssinatura: Mapped[date]
     prazo: Mapped[int] = mapped_column()
+    prazoRenda: Mapped[int] = mapped_column(nullable=True)
+    prazoCertoRenda: Mapped[int] = mapped_column(nullable=True)
 
     segurado: Mapped["Segurado"] = relationship(back_populates="matricula")
 

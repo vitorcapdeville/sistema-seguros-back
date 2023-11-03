@@ -9,10 +9,15 @@ class Produto(db.Model):
     produtoId: Mapped[int] = mapped_column(primary_key=True)
     nome: Mapped[str] = mapped_column(String(50))
     descricao: Mapped[str] = mapped_column(String(100))
+    formulaId: Mapped[int] = mapped_column(ForeignKey("formula.formulaId"))
 
     produtoPrazos: Mapped[list["ProdutoPrazo"]] = relationship(
         back_populates="produto", cascade="all, delete-orphan"
     )
+    produtoPrazosRenda: Mapped[list["ProdutoPrazoRenda"]] = relationship(
+        back_populates="produto", cascade="all, delete-orphan"
+    )
+    formula: Mapped["Formula"] = relationship(back_populates="produto")
 
 
 class ProdutoPrazo(db.Model):
@@ -44,3 +49,22 @@ class Juros(db.Model):
     produtoPrazos: Mapped[list["ProdutoPrazo"]] = relationship(
         back_populates="juros", cascade="all, delete-orphan"
     )
+
+
+class ProdutoPrazoRenda(db.Model):
+    __tablename__ = "produtoprazorenda"
+    produtoId: Mapped[int] = mapped_column(
+        ForeignKey("produto.produtoId"), primary_key=True
+    )
+    prazo: Mapped[int] = mapped_column(primary_key=True)
+    prazoCerto: Mapped[int] = mapped_column(primary_key=True)
+
+    produto: Mapped["Produto"] = relationship(back_populates="produtoPrazosRenda")
+
+
+class Formula(db.Model):
+    __tablename__ = "formula"
+    formulaId: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String(100))
+
+    produto: Mapped[list["Produto"]] = relationship(back_populates="formula")
