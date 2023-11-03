@@ -540,6 +540,7 @@ def init_db(db):
                 model.Taxa(idade=88, tabuaId=4, taxa=0.194465),
                 model.Taxa(idade=89, tabuaId=4, taxa=0.221363),
                 model.Taxa(idade=90, tabuaId=4, taxa=0.251988),
+                model.Taxa(idade=91, tabuaId=4, taxa=1.0),
             ],
         ),
         model.Tabua(
