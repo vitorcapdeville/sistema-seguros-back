@@ -1,4 +1,5 @@
 from datetime import date
+
 import tabatu as tb
 from flask import redirect
 from flask_cors import CORS
@@ -6,41 +7,34 @@ from flask_openapi3 import Info, OpenAPI, Tag
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import database_exists
 
-from model import (
-    Juros,
-    Matricula,
-    Produto,
-    ProdutoPrazo,
-    ProdutoPrazoRenda,
-    ProdutoTabua,
-    Formula,
-    Segurado,
-    Tabua,
-    Taxa,
-    db,
-    TipoTabua,
+from model.database import db, init_db
+from model.produto import Produto
+from model.queries import (
+    pegar_formula,
+    pegar_juros,
+    pegar_prazos,
+    pegar_prazos_renda,
+    pegar_taxas,
 )
-from model.database import init_db
+from model.segurado import Matricula, Segurado
 from schemas import (
+    ClienteSchema,
     ErrorSchema,
-    SimulacaoPeculioSchema,
-    SimulacaoAposentadoriaSchema,
-    ListagemPrazosSchema,
+    FormulaSchema,
     ListagemPrazosRendaSchema,
+    ListagemPrazosSchema,
     ListagemProdutosSchema,
     ProdutoBuscaSchema,
     ResultadoSimulacaoSchema,
-    ClienteSchema,
-    FormulaSchema,
+    SimulacaoAposentadoriaSchema,
+    SimulacaoPeculioSchema,
     apresenta_cliente,
     apresenta_prazos,
     apresenta_prazos_renda,
     apresenta_produtos,
-    prazo,
 )
-
-from src.produtos.peculio import peculio_capitalizado_fluxo
 from src.produtos.aposentadoria import aposentadoria_capitalizado
+from src.produtos.peculio import peculio_capitalizado_fluxo
 
 info = Info(title="Minha API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
@@ -88,11 +82,9 @@ def get_produtos():
 
     Retorna uma representação da listagem de produtos.
     """
-    # fazendo a busca
     produtos = db.session.execute(db.select(Produto)).scalars()
 
     if not produtos:
-        # se não há produtos cadastrados
         return {"produtos": []}, 200
     else:
         return apresenta_produtos(produtos), 200
@@ -104,12 +96,7 @@ def get_produtos():
     responses={"200": ListagemPrazosSchema, "404": ErrorSchema},
 )
 def get_prazos(query: ProdutoBuscaSchema):
-    query = (
-        db.select(ProdutoPrazo)
-        .join(ProdutoPrazo.produto)
-        .where(Produto.produtoId == query.produto_id)
-    )
-    prazos = db.session.execute(query).scalars()
+    prazos = pegar_prazos(db, query.produto_id)
     if not prazos:
         return [], 200
     else:
@@ -122,16 +109,10 @@ def get_prazos(query: ProdutoBuscaSchema):
     responses={"200": ListagemPrazosRendaSchema, "404": ErrorSchema},
 )
 def get_prazos_renda(query: ProdutoBuscaSchema):
-    query = (
-        db.select(ProdutoPrazoRenda)
-        .join(ProdutoPrazoRenda.produto)
-        .where(Produto.produtoId == query.produto_id)
-    )
-    prazos = db.session.execute(query).scalars()
+    prazos = pegar_prazos_renda(db, query.produto_id)
     if not prazos:
         return [], 200
-    else:
-        return apresenta_prazos_renda(prazos), 200
+    return apresenta_prazos_renda(prazos), 200
 
 
 @app.get(
@@ -140,18 +121,12 @@ def get_prazos_renda(query: ProdutoBuscaSchema):
     responses={"200": FormulaSchema, "404": ErrorSchema},
 )
 def get_formula(query: ProdutoBuscaSchema):
-    query = (
-        db.select(Formula.nome)
-        .join(Formula.produto)
-        .where(Produto.produtoId == query.produto_id)
-    )
-    formula = db.session.execute(query).scalars().one()
+    formula = pegar_formula(db, query.produto_id)
     if not formula:
         return {
             "mesage": f"Formula nao encontrada para produto {query.produto_id}"
         }, 400
-    else:
-        return FormulaSchema(formula=formula).model_dump(), 200
+    return FormulaSchema(formula=formula).model_dump(), 200
 
 
 @app.post(
@@ -203,42 +178,17 @@ def add_cliente(form: ClienteSchema):
     responses={"200": ResultadoSimulacaoSchema, "404": ErrorSchema},
 )
 def get_simulacao_peculio(query: SimulacaoPeculioSchema):
-    query_juros = (
-        db.select(Juros.juros)
-        .join(Juros.produtoPrazos)
-        .where(ProdutoPrazo.produtoId == query.produto_id)
-        .where(ProdutoPrazo.prazo == query.prazo)
-    )
-
-    query_taxa = (
-        db.select(Taxa.taxa)
-        .join(Tabua, Taxa.tabuaId == Tabua.id)
-        .join(ProdutoTabua, ProdutoTabua.tabuaId == Tabua.id)
-        .join(TipoTabua, TipoTabua.id == ProdutoTabua.tipoTabuaId)
-        .where(ProdutoTabua.produtoId == query.produto_id)
-        .where(ProdutoTabua.sexo == query.sexo)
-        .where(TipoTabua.nome == "Sinistro")
-    )
-
-    query_taxa_dpi = (
-        db.select(Taxa.taxa)
-        .join(Tabua, Taxa.tabuaId == Tabua.id)
-        .join(ProdutoTabua, ProdutoTabua.tabuaId == Tabua.id)
-        .join(TipoTabua, TipoTabua.id == ProdutoTabua.tipoTabuaId)
-        .where(ProdutoTabua.produtoId == query.produto_id)
-        .where(ProdutoTabua.sexo == query.sexo)
-        .where(TipoTabua.nome == "DPI")
-    )
-
     try:
-        juros = db.session.execute(query_juros).scalars().one()
-        taxa = db.session.execute(query_taxa).scalars().all()
-        taxa_dpi = db.session.execute(query_taxa_dpi).scalars().all()
+        juros = pegar_juros(db, query.produto_id, query.prazo)
+        taxa = pegar_taxas(db, query.produto_id, query.sexo, "Sinistro")
+        taxa_dpi = pegar_taxas(db, query.produto_id, query.sexo, "DPI")
         tabua_sinistro = tb.Tabua(taxa)
         tabua_pagamento = tabua_sinistro
+
         if len(taxa_dpi) > 0:
             tabua_dpi = tb.Tabua(taxa_dpi)
             tabua_pagamento = tb.TabuaMDT(tabua_sinistro, tabua_dpi)
+
         produto = peculio_capitalizado_fluxo(
             tabua_beneficio=tabua_sinistro,
             tabua_pagamento=tabua_pagamento,
@@ -250,9 +200,11 @@ def get_simulacao_peculio(query: SimulacaoPeculioSchema):
             beneficio=1000000,
             percentual_beneficio=[1.0],
         )
+
     except Exception as e:
         print(e)
-        return {"mesage": "Não foi possível realizar a simulação."}, 400
+        return {"mesage": f"Não foi possível realizar a simulação. \n {e}"}, 400
+
     return (
         ResultadoSimulacaoSchema(premio=produto.premio_comercial(0)).model_dump(),
         200,
@@ -265,37 +217,10 @@ def get_simulacao_peculio(query: SimulacaoPeculioSchema):
     responses={"200": ResultadoSimulacaoSchema, "404": ErrorSchema},
 )
 def get_simulacao_aposentadoria(query: SimulacaoAposentadoriaSchema):
-    query_juros = (
-        db.select(Juros.juros)
-        .join(Juros.produtoPrazos)
-        .where(ProdutoPrazo.produtoId == query.produto_id)
-        .where(ProdutoPrazo.prazo == query.prazo)
-    )
-
-    query_taxa_acumulacao = (
-        db.select(Taxa.taxa)
-        .join(Tabua, Taxa.tabuaId == Tabua.id)
-        .join(ProdutoTabua, ProdutoTabua.tabuaId == Tabua.id)
-        .join(TipoTabua, TipoTabua.id == ProdutoTabua.tipoTabuaId)
-        .where(ProdutoTabua.produtoId == query.produto_id)
-        .where(ProdutoTabua.sexo == query.sexo)
-        .where(TipoTabua.nome == "Acumulacao")
-    )
-
-    query_taxa_concessao = (
-        db.select(Taxa.taxa)
-        .join(Tabua, Taxa.tabuaId == Tabua.id)
-        .join(ProdutoTabua, ProdutoTabua.tabuaId == Tabua.id)
-        .join(TipoTabua, TipoTabua.id == ProdutoTabua.tipoTabuaId)
-        .where(ProdutoTabua.produtoId == query.produto_id)
-        .where(ProdutoTabua.sexo == query.sexo)
-        .where(TipoTabua.nome == "Concessao")
-    )
-
     try:
-        juros = db.session.execute(query_juros).scalars().one()
-        taxa_acumulacao = db.session.execute(query_taxa_acumulacao).scalars().all()
-        taxa_concessao = db.session.execute(query_taxa_concessao).scalars().all()
+        juros = pegar_juros(db, query.produto_id, query.prazo)
+        taxa_acumulacao = pegar_taxas(db, query.produto_id, query.sexo, "Acumulacao")
+        taxa_concessao = pegar_taxas(db, query.produto_id, query.sexo, "Concessao")
         produto = aposentadoria_capitalizado(
             tabua_acumulacao=tb.Tabua(taxa_acumulacao),
             tabua_concessao=tb.Tabua(taxa_concessao),
@@ -311,6 +236,7 @@ def get_simulacao_aposentadoria(query: SimulacaoAposentadoriaSchema):
         )
     except Exception as e:
         return {"mesage": e}, 400
+
     return (
         ResultadoSimulacaoSchema(premio=produto.premio_comercial(0)).model_dump(),
         200,
