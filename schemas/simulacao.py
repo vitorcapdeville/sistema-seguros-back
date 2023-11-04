@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SimulacaoSchema(BaseModel):
@@ -9,9 +9,9 @@ class SimulacaoSchema(BaseModel):
     sexo: str = "M"
     data_nascimento: date = date(1990, 1, 1)
     prazo: int = 10
-    prazo_renda: Optional[int] = 10
-    prazo_certo_renda: Optional[int] = None
     produto_id: int = 1
+    prazo_renda: Optional[int] = None
+    prazo_certo_renda: Optional[int] = None
 
 
 class SimulacaoPeculioSchema(BaseModel):
