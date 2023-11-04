@@ -39,4 +39,3 @@ class ParametrosProdutoSchema(BaseModel):
 
     prazos: list[int] = [1, 2, 3]
     prazos_renda: list[PrazoRendaSchema] = [PrazoRendaSchema()]
-    formula: str = "peculio"

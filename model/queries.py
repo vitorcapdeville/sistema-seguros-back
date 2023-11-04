@@ -61,5 +61,4 @@ def pegar_prazos(db, produto_id):
 def pegar_parametros_produto(db, produto_id):
     prazos = pegar_prazos(db, produto_id)
     prazos_renda = pegar_prazos_renda(db, produto_id)
-    formula = pegar_formula(db, produto_id)
-    return prazos, prazos_renda, formula
+    return prazos, prazos_renda

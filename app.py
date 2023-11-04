@@ -106,7 +106,7 @@ def get_parametros_produto(path: ProdutoBuscaSchema):
     e a fórmula utilizada para simulação.
     """
     try:
-        prazos, prazos_renda, formula = pegar_parametros_produto(db, path.produto_id)
+        prazos, prazos_renda = pegar_parametros_produto(db, path.produto_id)
     except NoResultFound:
         return (
             ErrorSchema(
@@ -120,12 +120,9 @@ def get_parametros_produto(path: ProdutoBuscaSchema):
         PrazoRendaSchema(prazo=prazo.prazo, prazo_certo=prazo.prazoCerto)
         for prazo in prazos_renda
     ]
-    formula = formula.nome
 
     return (
-        ParametrosProdutoSchema(
-            prazos=prazos, prazos_renda=prazos_renda, formula=formula
-        ).model_dump(),
+        ParametrosProdutoSchema(prazos=prazos, prazos_renda=prazos_renda).model_dump(),
         200,
     )
 
