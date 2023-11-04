@@ -17,48 +17,51 @@ from model.queries import (
     pegar_taxas,
 )
 from model.segurado import Matricula, Segurado
-from schemas import (
-    ClienteSchema,
-    ErrorSchema,
-    FormulaSchema,
+from schemas.cliente import ClienteSchema, apresenta_cliente
+from schemas.error import ErrorSchema
+from schemas.formula import FormulaSchema
+from schemas.prazo import (
     ListagemPrazosRendaSchema,
     ListagemPrazosSchema,
+    apresenta_prazos,
+    apresenta_prazos_renda,
+)
+from schemas.produto import (
     ListagemProdutosSchema,
     ProdutoBuscaSchema,
+    apresenta_produtos,
+)
+from schemas.simulacao import (
     ResultadoSimulacaoSchema,
     SimulacaoAposentadoriaSchema,
     SimulacaoPeculioSchema,
-    apresenta_cliente,
-    apresenta_prazos,
-    apresenta_prazos_renda,
-    apresenta_produtos,
 )
 from src.produtos.aposentadoria import aposentadoria_capitalizado
 from src.produtos.peculio import peculio_capitalizado_fluxo
 
-info = Info(title="Minha API", version="1.0.0")
+info = Info(title="Sistema Seguros", version="1.0.0")
 app = OpenAPI(__name__, info=info)
 CORS(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
-# initialize the app with the extension
 db.init_app(app)
 
-# db.engine.url
 with app.app_context():
     if not database_exists(db.engine.url):
         print("Inicializando o banco de dados.")
         init_db(db)
 
-# definindo tags
 home_tag = Tag(
     name="Documentação",
     description="Seleção de documentação: Swagger, Redoc ou RapiDoc",
 )
-produto_tag = Tag(name="Produto", description="Consulta de produtos.")
-prazos_tag = Tag(
-    name="Prazos",
-    description="Consulta de prazos de pagamento e de cobertura de produtos.",
+produto_tag = Tag(
+    name="Produto",
+    description="Consulta produtos disponíveis e informações adicionais sobre eles.",
+)
+simular_tag = Tag(
+    name="Simular",
+    description="Realiza simulações para potenciais novos clientes.",
 )
 contratar_tag = Tag(
     name="Contratar",
@@ -92,7 +95,7 @@ def get_produtos():
 
 @app.get(
     "/prazos",
-    tags=[prazos_tag],
+    tags=[produto_tag],
     responses={"200": ListagemPrazosSchema, "404": ErrorSchema},
 )
 def get_prazos(query: ProdutoBuscaSchema):
@@ -105,7 +108,7 @@ def get_prazos(query: ProdutoBuscaSchema):
 
 @app.get(
     "/prazos_renda",
-    tags=[prazos_tag],
+    tags=[produto_tag],
     responses={"200": ListagemPrazosRendaSchema, "404": ErrorSchema},
 )
 def get_prazos_renda(query: ProdutoBuscaSchema):
@@ -117,7 +120,7 @@ def get_prazos_renda(query: ProdutoBuscaSchema):
 
 @app.get(
     "/formula",
-    tags=[prazos_tag],
+    tags=[produto_tag],
     responses={"200": FormulaSchema, "404": ErrorSchema},
 )
 def get_formula(query: ProdutoBuscaSchema):
@@ -174,7 +177,7 @@ def add_cliente(form: ClienteSchema):
 
 @app.get(
     "/simular/peculio",
-    tags=[prazos_tag],
+    tags=[simular_tag],
     responses={"200": ResultadoSimulacaoSchema, "404": ErrorSchema},
 )
 def get_simulacao_peculio(query: SimulacaoPeculioSchema):
@@ -213,7 +216,7 @@ def get_simulacao_peculio(query: SimulacaoPeculioSchema):
 
 @app.get(
     "/simular/aposentadoria",
-    tags=[prazos_tag],
+    tags=[simular_tag],
     responses={"200": ResultadoSimulacaoSchema, "404": ErrorSchema},
 )
 def get_simulacao_aposentadoria(query: SimulacaoAposentadoriaSchema):
