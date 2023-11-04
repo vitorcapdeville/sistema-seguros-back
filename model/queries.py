@@ -35,9 +35,7 @@ def pegar_taxas(db, produto_id: int, sexo: str, tipo_tabua: str) -> list[float]:
 
 def pegar_formula(db, produto_id):
     query = (
-        db.select(Formula.nome)
-        .join(Formula.produto)
-        .where(Produto.produtoId == produto_id)
+        db.select(Formula).join(Formula.produto).where(Produto.produtoId == produto_id)
     )
     return db.session.execute(query).scalars().one()
 
@@ -58,3 +56,10 @@ def pegar_prazos(db, produto_id):
         .where(Produto.produtoId == produto_id)
     )
     return db.session.execute(query).scalars().all()
+
+
+def pegar_parametros_produto(db, produto_id):
+    prazos = pegar_prazos(db, produto_id)
+    prazos_renda = pegar_prazos_renda(db, produto_id)
+    formula = pegar_formula(db, produto_id)
+    return prazos, prazos_renda, formula

@@ -1,5 +1,17 @@
 from datetime import date
+from typing import Optional
 from pydantic import BaseModel
+
+
+class SimulacaoSchema(BaseModel):
+    """Representa os dados para uma simulação genérica."""
+
+    sexo: str = "M"
+    data_nascimento: date = date(1990, 1, 1)
+    prazo: int = 10
+    prazo_renda: Optional[int] = 10
+    prazo_certo_renda: Optional[int] = None
+    produto_id: int = 1
 
 
 class SimulacaoPeculioSchema(BaseModel):

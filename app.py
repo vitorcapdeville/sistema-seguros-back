@@ -1,10 +1,10 @@
 from datetime import date
 
 import tabatu as tb
-from flask import redirect
+from flask import redirect, url_for
 from flask_cors import CORS
 from flask_openapi3 import Info, OpenAPI, Tag
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy_utils import database_exists
 
 from model.database import db, init_db
@@ -12,29 +12,23 @@ from model.produto import Produto
 from model.queries import (
     pegar_formula,
     pegar_juros,
-    pegar_prazos,
-    pegar_prazos_renda,
+    pegar_parametros_produto,
     pegar_taxas,
 )
 from model.segurado import Matricula, Segurado
-from schemas.cliente import ClienteSchema, apresenta_cliente
+from schemas.cliente import ClienteSchema
 from schemas.error import ErrorSchema
-from schemas.formula import FormulaSchema
-from schemas.prazo import (
-    ListagemPrazosRendaSchema,
-    ListagemPrazosSchema,
-    apresenta_prazos,
-    apresenta_prazos_renda,
-)
 from schemas.produto import (
     ListagemProdutosSchema,
+    ParametrosProdutoSchema,
+    PrazoRendaSchema,
     ProdutoBuscaSchema,
-    apresenta_produtos,
 )
 from schemas.simulacao import (
     ResultadoSimulacaoSchema,
     SimulacaoAposentadoriaSchema,
     SimulacaoPeculioSchema,
+    SimulacaoSchema,
 )
 from src.produtos.aposentadoria import aposentadoria_capitalizado
 from src.produtos.peculio import peculio_capitalizado_fluxo
@@ -81,55 +75,59 @@ def home():
     responses={"200": ListagemProdutosSchema, "404": ErrorSchema},
 )
 def get_produtos():
-    """Faz a busca por todos os Produto cadastrados
+    """Faz a busca por todos os produto cadastrados.
 
     Retorna uma representação da listagem de produtos.
     """
     produtos = db.session.execute(db.select(Produto)).scalars()
 
-    if not produtos:
-        return {"produtos": []}, 200
-    else:
-        return apresenta_produtos(produtos), 200
+    result = []
+    for produto in produtos:
+        result.append(
+            {
+                "id": produto.produtoId,
+                "nome": produto.nome,
+                "descricao": produto.descricao,
+            }
+        )
+
+    return ListagemProdutosSchema(result).model_dump(), 200
 
 
 @app.get(
-    "/prazos",
+    "/produtos/<int:produto_id>",
     tags=[produto_tag],
-    responses={"200": ListagemPrazosSchema, "404": ErrorSchema},
+    responses={"200": ParametrosProdutoSchema, "404": ErrorSchema},
 )
-def get_prazos(query: ProdutoBuscaSchema):
-    prazos = pegar_prazos(db, query.produto_id)
-    if not prazos:
-        return [], 200
-    else:
-        return apresenta_prazos(prazos), 200
+def get_parametros_produto(path: ProdutoBuscaSchema):
+    """Faz a busca pelos parâmetros de um produto específico.
 
+    Retorna os prazos e os prazos de renda e renda certa disponíveis para contratação
+    e a fórmula utilizada para simulação.
+    """
+    try:
+        prazos, prazos_renda, formula = pegar_parametros_produto(db, path.produto_id)
+    except NoResultFound:
+        return (
+            ErrorSchema(
+                mesage=f"Produto {path.produto_id} não encontrado."
+            ).model_dump(),
+            404,
+        )
 
-@app.get(
-    "/prazos_renda",
-    tags=[produto_tag],
-    responses={"200": ListagemPrazosRendaSchema, "404": ErrorSchema},
-)
-def get_prazos_renda(query: ProdutoBuscaSchema):
-    prazos = pegar_prazos_renda(db, query.produto_id)
-    if not prazos:
-        return [], 200
-    return apresenta_prazos_renda(prazos), 200
+    prazos = [prazo.prazo for prazo in prazos]
+    prazos_renda = [
+        PrazoRendaSchema(prazo=prazo.prazo, prazo_certo=prazo.prazoCerto)
+        for prazo in prazos_renda
+    ]
+    formula = formula.nome
 
-
-@app.get(
-    "/formula",
-    tags=[produto_tag],
-    responses={"200": FormulaSchema, "404": ErrorSchema},
-)
-def get_formula(query: ProdutoBuscaSchema):
-    formula = pegar_formula(db, query.produto_id)
-    if not formula:
-        return {
-            "mesage": f"Formula nao encontrada para produto {query.produto_id}"
-        }, 400
-    return FormulaSchema(formula=formula).model_dump(), 200
+    return (
+        ParametrosProdutoSchema(
+            prazos=prazos, prazos_renda=prazos_renda, formula=formula
+        ).model_dump(),
+        200,
+    )
 
 
 @app.post(
@@ -162,29 +160,65 @@ def add_cliente(form: ClienteSchema):
     try:
         db.session.add(cliente)
         db.session.commit()
-        return apresenta_cliente(form), 200
+        return form.model_dump(), 200
 
-    except IntegrityError as e:
-        print(e)
-        error_msg = "Cliente já existe na base."
-        return {"mesage": error_msg}, 409
+    except IntegrityError:
+        return ErrorSchema(message="Cliente já existe na base.").model_dump(), 409
 
     except Exception as e:
-        error_msg = "Não foi possível salvar novo cliente."
-        print(e)
-        return {"mesage": error_msg}, 400
+        return ErrorSchema(message=e).model_dump(), 400
+
+
+@app.get(
+    "/simular",
+    tags=[simular_tag],
+    responses={
+        "200": ResultadoSimulacaoSchema,
+        "302": {"description": "Redirecianado para a rota de simulação adequada."},
+        "404": ErrorSchema,
+    },
+)
+def get_simulacao(query: SimulacaoSchema):
+    """Faz a simulação de um produto genérico.
+
+    Essa rota recebe um produto e um conjunto de parâmetros e redireciona para a rota
+    adequada para simulação do produto. Os parâmetros podem conter valores que não
+    serão utilizados.
+    """
+    try:
+        formula = pegar_formula(db, query.produto_id)
+    except NoResultFound:
+        return (
+            ErrorSchema(
+                mesage=f"Produto {query.produto_id} não encontrado."
+            ).model_dump(),
+            404,
+        )
+    return redirect(url_for(f"get_simulacao_{formula.nome}", **query.model_dump()))
 
 
 @app.get(
     "/simular/peculio",
     tags=[simular_tag],
-    responses={"200": ResultadoSimulacaoSchema, "404": ErrorSchema},
+    responses={"200": ResultadoSimulacaoSchema, "400": ErrorSchema, "404": ErrorSchema},
 )
 def get_simulacao_peculio(query: SimulacaoPeculioSchema):
+    """Faz a simulação de um produto do tipo pecúlio.
+
+    Retorna o valor do prêmio comercial para o produto e os parâmetros informados."""
     try:
         juros = pegar_juros(db, query.produto_id, query.prazo)
         taxa = pegar_taxas(db, query.produto_id, query.sexo, "Sinistro")
         taxa_dpi = pegar_taxas(db, query.produto_id, query.sexo, "DPI")
+    except NoResultFound:
+        return (
+            ErrorSchema(
+                mesage=f"Produto {query.produto_id} não encontrado."
+            ).model_dump(),
+            404,
+        )
+
+    try:
         tabua_sinistro = tb.Tabua(taxa)
         tabua_pagamento = tabua_sinistro
 
@@ -205,8 +239,7 @@ def get_simulacao_peculio(query: SimulacaoPeculioSchema):
         )
 
     except Exception as e:
-        print(e)
-        return {"mesage": f"Não foi possível realizar a simulação. \n {e}"}, 400
+        return ErrorSchema(message=e).model_dump(), 400
 
     return (
         ResultadoSimulacaoSchema(premio=produto.premio_comercial(0)).model_dump(),
@@ -217,13 +250,25 @@ def get_simulacao_peculio(query: SimulacaoPeculioSchema):
 @app.get(
     "/simular/aposentadoria",
     tags=[simular_tag],
-    responses={"200": ResultadoSimulacaoSchema, "404": ErrorSchema},
+    responses={"200": ResultadoSimulacaoSchema, "400": ErrorSchema, "404": ErrorSchema},
 )
 def get_simulacao_aposentadoria(query: SimulacaoAposentadoriaSchema):
+    """Faz a simulação de um produto do tipo aposentadoria.
+
+    Retorna o valor do prêmio comercial para o produto e os parâmetros informados."""
     try:
         juros = pegar_juros(db, query.produto_id, query.prazo)
         taxa_acumulacao = pegar_taxas(db, query.produto_id, query.sexo, "Acumulacao")
         taxa_concessao = pegar_taxas(db, query.produto_id, query.sexo, "Concessao")
+    except NoResultFound:
+        return (
+            ErrorSchema(
+                mesage=f"Produto {query.produto_id} não encontrado."
+            ).model_dump(),
+            404,
+        )
+
+    try:
         produto = aposentadoria_capitalizado(
             tabua_acumulacao=tb.Tabua(taxa_acumulacao),
             tabua_concessao=tb.Tabua(taxa_concessao),
@@ -238,7 +283,7 @@ def get_simulacao_aposentadoria(query: SimulacaoAposentadoriaSchema):
             percentual_beneficio=[1.0],
         )
     except Exception as e:
-        return {"mesage": e}, 400
+        return ErrorSchema(message=e).model_dump(), 400
 
     return (
         ResultadoSimulacaoSchema(premio=produto.premio_comercial(0)).model_dump(),
