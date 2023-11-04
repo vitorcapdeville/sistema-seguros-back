@@ -6,6 +6,7 @@ from model.produto import (
     Juros,
     ProdutoPrazoRenda,
     Formula,
+    TipoTabua,
 )
 from model.segurado import Matricula, Segurado
 from model.tabua import Tabua, Taxa
@@ -17,6 +18,7 @@ __all__ = [
     "ProdutoPrazo",
     "ProdutoPrazoRenda",
     "ProdutoTabua",
+    "TipoTabua",
     "Formula",
     "Segurado",
     "Tabua",

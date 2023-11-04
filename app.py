@@ -18,7 +18,7 @@ from model import (
     Tabua,
     Taxa,
     db,
-    tabua,
+    TipoTabua,
 )
 from model.database import init_db
 from schemas import (
@@ -214,16 +214,34 @@ def get_simulacao_peculio(query: SimulacaoPeculioSchema):
         db.select(Taxa.taxa)
         .join(Tabua, Taxa.tabuaId == Tabua.id)
         .join(ProdutoTabua, ProdutoTabua.tabuaId == Tabua.id)
+        .join(TipoTabua, TipoTabua.id == ProdutoTabua.tipoTabuaId)
         .where(ProdutoTabua.produtoId == query.produto_id)
         .where(ProdutoTabua.sexo == query.sexo)
+        .where(TipoTabua.nome == "Sinistro")
+    )
+
+    query_taxa_dpi = (
+        db.select(Taxa.taxa)
+        .join(Tabua, Taxa.tabuaId == Tabua.id)
+        .join(ProdutoTabua, ProdutoTabua.tabuaId == Tabua.id)
+        .join(TipoTabua, TipoTabua.id == ProdutoTabua.tipoTabuaId)
+        .where(ProdutoTabua.produtoId == query.produto_id)
+        .where(ProdutoTabua.sexo == query.sexo)
+        .where(TipoTabua.nome == "DPI")
     )
 
     try:
         juros = db.session.execute(query_juros).scalars().one()
         taxa = db.session.execute(query_taxa).scalars().all()
+        taxa_dpi = db.session.execute(query_taxa_dpi).scalars().all()
+        tabua_sinistro = tb.Tabua(taxa)
+        tabua_pagamento = tabua_sinistro
+        if len(taxa_dpi) > 0:
+            tabua_dpi = tb.Tabua(taxa_dpi)
+            tabua_pagamento = tb.TabuaMDT(tabua_sinistro, tabua_dpi)
         produto = peculio_capitalizado_fluxo(
-            tabua_beneficio=tb.Tabua(taxa),
-            tabua_pagamento=tb.Tabua(taxa),
+            tabua_beneficio=tabua_sinistro,
+            tabua_pagamento=tabua_pagamento,
             juros=tb.JurosConstante(juros),
             data_assinatura=date.today(),
             data_nascimento_segurado=query.data_nascimento,
@@ -254,20 +272,33 @@ def get_simulacao_aposentadoria(query: SimulacaoAposentadoriaSchema):
         .where(ProdutoPrazo.prazo == query.prazo)
     )
 
-    query_taxa = (
+    query_taxa_acumulacao = (
         db.select(Taxa.taxa)
         .join(Tabua, Taxa.tabuaId == Tabua.id)
         .join(ProdutoTabua, ProdutoTabua.tabuaId == Tabua.id)
+        .join(TipoTabua, TipoTabua.id == ProdutoTabua.tipoTabuaId)
         .where(ProdutoTabua.produtoId == query.produto_id)
         .where(ProdutoTabua.sexo == query.sexo)
+        .where(TipoTabua.nome == "Acumulacao")
+    )
+
+    query_taxa_concessao = (
+        db.select(Taxa.taxa)
+        .join(Tabua, Taxa.tabuaId == Tabua.id)
+        .join(ProdutoTabua, ProdutoTabua.tabuaId == Tabua.id)
+        .join(TipoTabua, TipoTabua.id == ProdutoTabua.tipoTabuaId)
+        .where(ProdutoTabua.produtoId == query.produto_id)
+        .where(ProdutoTabua.sexo == query.sexo)
+        .where(TipoTabua.nome == "Concessao")
     )
 
     try:
         juros = db.session.execute(query_juros).scalars().one()
-        taxa = db.session.execute(query_taxa).scalars().all()
+        taxa_acumulacao = db.session.execute(query_taxa_acumulacao).scalars().all()
+        taxa_concessao = db.session.execute(query_taxa_concessao).scalars().all()
         produto = aposentadoria_capitalizado(
-            tabua_acumulacao=tb.Tabua(taxa),
-            tabua_concessao=tb.Tabua(taxa),
+            tabua_acumulacao=tb.Tabua(taxa_acumulacao),
+            tabua_concessao=tb.Tabua(taxa_concessao),
             juros=tb.JurosConstante(juros),
             data_assinatura=date.today(),
             data_nascimento_segurado=query.data_nascimento,

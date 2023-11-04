@@ -38,7 +38,16 @@ class ProdutoTabua(db.Model):
         ForeignKey("produto.produtoId"), primary_key=True
     )
     sexo: Mapped[str] = mapped_column(String(1), primary_key=True)
+    tipoTabuaId: Mapped[str] = mapped_column(
+        String(10), ForeignKey("tipotabua.id"), primary_key=True
+    )
     tabuaId: Mapped[int] = mapped_column(ForeignKey("tabua.id"))
+
+
+class TipoTabua(db.Model):
+    __tablename__ = "tipotabua"
+    id: Mapped[str] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String(100))
 
 
 class Juros(db.Model):

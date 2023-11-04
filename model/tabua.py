@@ -8,7 +8,6 @@ class Tabua(db.Model):
     __tablename__ = "tabua"
     id: Mapped[int] = mapped_column(primary_key=True)
     nome: Mapped[str] = mapped_column(String(50))
-    tipo: Mapped[str] = mapped_column(String(50))
 
     taxa: Mapped[list["Taxa"]] = relationship(
         back_populates="tabua", cascade="all, delete-orphan"
