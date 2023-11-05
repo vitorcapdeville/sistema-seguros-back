@@ -12,5 +12,6 @@ class ClienteSchema(BaseModel):
     produto_id: int = 1
     data_assinatura: date = date(2023, 10, 29)
     prazo: int = 10
+    beneficio: int = 10000
     prazo_renda: Optional[int] = None
     prazo_certo_renda: Optional[int] = None

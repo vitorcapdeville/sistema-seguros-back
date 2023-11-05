@@ -27,6 +27,7 @@ class Matricula(db.Model):
     prazo: Mapped[int] = mapped_column()
     prazoRenda: Mapped[int] = mapped_column(nullable=True)
     prazoCertoRenda: Mapped[int] = mapped_column(nullable=True)
+    beneficio: Mapped[float] = mapped_column()
 
     segurado: Mapped["Segurado"] = relationship(back_populates="matricula")
 

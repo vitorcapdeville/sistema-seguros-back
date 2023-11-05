@@ -916,6 +916,7 @@ def init_db(db):
             prazo=10,
             prazoRenda=None,
             prazoCertoRenda=None,
+            beneficio=50000,
             segurado=segurado,
         ),
         Matricula(
@@ -926,6 +927,7 @@ def init_db(db):
             prazo=15,
             prazoRenda=None,
             prazoCertoRenda=None,
+            beneficio=1000000,
             segurado=segurado,
         ),
     ]

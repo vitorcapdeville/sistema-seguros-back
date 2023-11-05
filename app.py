@@ -153,6 +153,7 @@ def add_cliente(form: ClienteSchema):
         prazo=form.prazo,
         prazoRenda=form.prazo_renda,
         prazoCertoRenda=form.prazo_certo_renda,
+        beneficio=form.beneficio,
     )
     try:
         db.session.add(cliente)
@@ -231,7 +232,7 @@ def get_simulacao_peculio(query: SimulacaoPeculioSchema):
             data_nascimento_segurado=query.data_nascimento,
             prazo_cobertura=query.prazo,
             prazo_pagamento=query.prazo,
-            beneficio=1000000,
+            beneficio=query.beneficio,
             percentual_beneficio=[1.0],
         )
 
@@ -276,7 +277,7 @@ def get_simulacao_aposentadoria(query: SimulacaoAposentadoriaSchema):
             prazo_pagamento=query.prazo,
             prazo_renda=query.prazo_renda,
             prazo_certo_renda=query.prazo_certo_renda,
-            beneficio=2000,
+            beneficio=query.beneficio,
             percentual_beneficio=[1.0],
         )
     except Exception as e:
