@@ -45,24 +45,32 @@ def init_db(db):
             nome="Peculio por morte",
             descricao="Protege financeiramente a sua família em caso de morte por qualquer causa.",
             formulaId=1,
+            beneficioMinimo=50_000,
+            beneficioMaximo=1_000_000
         ),
         Produto(
             produtoId=2,
             nome="Peculio por morte com DPI",
             descricao="Garante uma indenização em caso de morte, e possui dispensa de pagamento de prêmio por invalidez.",
             formulaId=1,
+            beneficioMinimo=50_000,
+            beneficioMaximo=1_000_000
         ),
         Produto(
             produtoId=3,
             nome="Peculio por invalidez",
             descricao="Garante uma indenização em caso de invalidez.",
             formulaId=1,
+            beneficioMinimo=200_000,
+            beneficioMaximo=3_000_000
         ),
         Produto(
             produtoId=7,
             nome="Aposentadoria",
             descricao="Garante a manutenção da sua qualidade de vida ao se aposentar.",
             formulaId=2,
+            beneficioMinimo=500,
+            beneficioMaximo=10_000
         ),
     ]
 

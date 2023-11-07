@@ -10,6 +10,8 @@ class Produto(db.Model):
     nome: Mapped[str] = mapped_column(String(50))
     descricao: Mapped[str] = mapped_column(String(100))
     formulaId: Mapped[int] = mapped_column(ForeignKey("formula.formulaId"))
+    beneficioMinimo: Mapped[int] = mapped_column()
+    beneficioMaximo: Mapped[int] = mapped_column()
 
     produtoPrazos: Mapped[list["ProdutoPrazo"]] = relationship(
         back_populates="produto", cascade="all, delete-orphan"

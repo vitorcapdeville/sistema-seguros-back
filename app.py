@@ -19,6 +19,7 @@ from model.segurado import Matricula, Segurado
 from schemas.cliente import ClienteSchema
 from schemas.error import ErrorSchema
 from schemas.produto import (
+    BeneficioSchema,
     ListagemProdutosSchema,
     ParametrosProdutoSchema,
     PrazoRendaSchema,
@@ -106,7 +107,7 @@ def get_parametros_produto(path: ProdutoBuscaSchema):
     e a fórmula utilizada para simulação.
     """
     try:
-        prazos, prazos_renda = pegar_parametros_produto(db, path.produto_id)
+        beneficio, prazos, prazos_renda = pegar_parametros_produto(db, path.produto_id)
     except NoResultFound:
         return (
             ErrorSchema(
@@ -120,9 +121,15 @@ def get_parametros_produto(path: ProdutoBuscaSchema):
         PrazoRendaSchema(prazo=prazo.prazo, prazo_certo=prazo.prazoCerto)
         for prazo in prazos_renda
     ]
+    beneficio = BeneficioSchema(
+        beneficio_minimo=beneficio.beneficioMinimo,
+        beneficio_maximo=beneficio.beneficioMaximo,
+    )
 
     return (
-        ParametrosProdutoSchema(prazos=prazos, prazos_renda=prazos_renda).model_dump(),
+        ParametrosProdutoSchema(
+            prazos=prazos, prazos_renda=prazos_renda, beneficio=beneficio
+        ).model_dump(),
         200,
     )
 

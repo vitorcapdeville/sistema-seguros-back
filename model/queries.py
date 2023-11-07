@@ -1,3 +1,4 @@
+from typing import Optional
 from model.produto import (
     Formula,
     Juros,
@@ -58,7 +59,16 @@ def pegar_prazos(db, produto_id):
     return db.session.execute(query).scalars().all()
 
 
+def pegar_beneficio(db, produto_id):
+    query = db.select(Produto.beneficioMinimo, Produto.beneficioMaximo).where(
+        Produto.produtoId == produto_id
+    )
+
+    return db.session.execute(query).one()
+
+
 def pegar_parametros_produto(db, produto_id):
+    beneficio = pegar_beneficio(db, produto_id)
     prazos = pegar_prazos(db, produto_id)
     prazos_renda = pegar_prazos_renda(db, produto_id)
-    return prazos, prazos_renda
+    return beneficio, prazos, prazos_renda
