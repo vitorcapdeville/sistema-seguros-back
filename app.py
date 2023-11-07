@@ -86,7 +86,7 @@ def get_produtos():
     for produto in produtos:
         result.append(
             {
-                "id": produto.produtoId,
+                "id": produto.id,
                 "nome": produto.nome,
                 "descricao": produto.descricao,
             }

@@ -27,8 +27,8 @@ def init_db(db):
     db.create_all()
 
     formulas = [
-        Formula(formulaId=1, nome="peculio"),
-        Formula(formulaId=2, nome="aposentadoria"),
+        Formula(id=1, nome="peculio"),
+        Formula(id=2, nome="aposentadoria"),
     ]
 
     segurado = Segurado(
@@ -41,7 +41,7 @@ def init_db(db):
 
     produtos = [
         Produto(
-            produtoId=1,
+            id=1,
             nome="Peculio por morte",
             descricao="Protege financeiramente a sua família em caso de morte por qualquer causa.",
             formulaId=1,
@@ -49,7 +49,7 @@ def init_db(db):
             beneficioMaximo=1_000_000
         ),
         Produto(
-            produtoId=2,
+            id=2,
             nome="Peculio por morte com DPI",
             descricao="Garante uma indenização em caso de morte, e possui dispensa de pagamento de prêmio por invalidez.",
             formulaId=1,
@@ -57,7 +57,7 @@ def init_db(db):
             beneficioMaximo=1_000_000
         ),
         Produto(
-            produtoId=3,
+            id=3,
             nome="Peculio por invalidez",
             descricao="Garante uma indenização em caso de invalidez.",
             formulaId=1,
@@ -65,7 +65,7 @@ def init_db(db):
             beneficioMaximo=3_000_000
         ),
         Produto(
-            produtoId=7,
+            id=7,
             nome="Aposentadoria",
             descricao="Garante a manutenção da sua qualidade de vida ao se aposentar.",
             formulaId=2,
@@ -890,9 +890,9 @@ def init_db(db):
     ]
 
     juros = [
-        Juros(jurosId=1, juros=0.02),
-        Juros(jurosId=2, juros=0.04),
-        Juros(jurosId=3, juros=0.06),
+        Juros(id=1, juros=0.02),
+        Juros(id=2, juros=0.04),
+        Juros(id=3, juros=0.06),
     ]
 
     produto_prazo = [
@@ -917,7 +917,7 @@ def init_db(db):
 
     matricula = [
         Matricula(
-            matriculaId=1,
+            id=1,
             cpfSegurado=12345678900,
             produtoId=1,
             dataAssinatura=date(2020, 1, 1),
@@ -928,7 +928,7 @@ def init_db(db):
             segurado=segurado,
         ),
         Matricula(
-            matriculaId=2,
+            id=2,
             cpfSegurado=12345678900,
             produtoId=2,
             dataAssinatura=date(2020, 1, 1),

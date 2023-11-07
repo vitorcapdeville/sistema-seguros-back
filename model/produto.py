@@ -6,10 +6,10 @@ from model.database import db
 
 class Produto(db.Model):
     __tablename__ = "produto"
-    produtoId: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     nome: Mapped[str] = mapped_column(String(50))
     descricao: Mapped[str] = mapped_column(String(100))
-    formulaId: Mapped[int] = mapped_column(ForeignKey("formula.formulaId"))
+    formulaId: Mapped[int] = mapped_column(ForeignKey("formula.id"))
     beneficioMinimo: Mapped[int] = mapped_column()
     beneficioMaximo: Mapped[int] = mapped_column()
 
@@ -24,11 +24,9 @@ class Produto(db.Model):
 
 class ProdutoPrazo(db.Model):
     __tablename__ = "produtoprazo"
-    produtoId: Mapped[int] = mapped_column(
-        ForeignKey("produto.produtoId"), primary_key=True
-    )
+    produtoId: Mapped[int] = mapped_column(ForeignKey("produto.id"), primary_key=True)
     prazo: Mapped[int] = mapped_column(primary_key=True)
-    jurosId: Mapped[int] = mapped_column(ForeignKey("juros.jurosId"))
+    jurosId: Mapped[int] = mapped_column(ForeignKey("juros.id"))
 
     produto: Mapped["Produto"] = relationship(back_populates="produtoPrazos")
     juros: Mapped["Juros"] = relationship()
@@ -36,9 +34,7 @@ class ProdutoPrazo(db.Model):
 
 class ProdutoTabua(db.Model):
     __tablename__ = "produtotabua"
-    produtoId: Mapped[int] = mapped_column(
-        ForeignKey("produto.produtoId"), primary_key=True
-    )
+    produtoId: Mapped[int] = mapped_column(ForeignKey("produto.id"), primary_key=True)
     sexo: Mapped[str] = mapped_column(String(1), primary_key=True)
     tipoTabuaId: Mapped[str] = mapped_column(
         String(10), ForeignKey("tipotabua.id"), primary_key=True
@@ -54,7 +50,7 @@ class TipoTabua(db.Model):
 
 class Juros(db.Model):
     __tablename__ = "juros"
-    jurosId: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     juros: Mapped[float] = mapped_column()
 
     produtoPrazos: Mapped[list["ProdutoPrazo"]] = relationship(
@@ -64,9 +60,7 @@ class Juros(db.Model):
 
 class ProdutoPrazoRenda(db.Model):
     __tablename__ = "produtoprazorenda"
-    produtoId: Mapped[int] = mapped_column(
-        ForeignKey("produto.produtoId"), primary_key=True
-    )
+    produtoId: Mapped[int] = mapped_column(ForeignKey("produto.id"), primary_key=True)
     prazo: Mapped[int] = mapped_column(primary_key=True)
     prazoCerto: Mapped[int] = mapped_column(primary_key=True)
 
@@ -75,7 +69,7 @@ class ProdutoPrazoRenda(db.Model):
 
 class Formula(db.Model):
     __tablename__ = "formula"
-    formulaId: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     nome: Mapped[str] = mapped_column(String(100))
 
     produto: Mapped[list["Produto"]] = relationship(back_populates="formula")

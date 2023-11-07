@@ -20,9 +20,9 @@ class Segurado(db.Model):
 
 class Matricula(db.Model):
     __tablename__ = "matricula"
-    matriculaId: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     cpfSegurado: Mapped[int] = mapped_column(ForeignKey("segurado.cpf"))
-    produtoId: Mapped[int] = mapped_column(ForeignKey("produto.produtoId"))
+    produtoId: Mapped[int] = mapped_column(ForeignKey("produto.id"))
     dataAssinatura: Mapped[date]
     prazo: Mapped[int] = mapped_column()
     prazoRenda: Mapped[int] = mapped_column(nullable=True)
