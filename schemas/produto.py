@@ -1,7 +1,5 @@
 from pydantic import BaseModel, RootModel
 
-from model.produto import Produto
-
 
 class ProdutoSchema(BaseModel):
     """Define como um produto será retornado"""

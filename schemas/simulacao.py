@@ -3,40 +3,32 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class SimulacaoSchema(BaseModel):
-    """Representa os dados para uma simulação genérica."""
-
+class SimulacaoInterfaceSchema(BaseModel):
     sexo: str = "M"
     data_nascimento: date = date(1990, 1, 1)
     prazo: int = 10
     produto_id: int = 1
     beneficio: float = 10000
+
+
+class SimulacaoSchema(SimulacaoInterfaceSchema):
+    """Representa os dados para uma simulação genérica."""
+
     prazo_renda: Optional[int] = None
     prazo_certo_renda: Optional[int] = None
 
 
-class SimulacaoPeculioSchema(BaseModel):
+class SimulacaoPeculioSchema(SimulacaoInterfaceSchema):
     """Representa os dados que fazem parte do input do usuário para a simulação
     de um produto do tipo peculio."""
 
-    sexo: str = "M"
-    data_nascimento: date = date(1990, 1, 1)
-    prazo: int = 10
-    produto_id: int = 1
-    beneficio: float = 10000
 
-
-class SimulacaoAposentadoriaSchema(BaseModel):
+class SimulacaoAposentadoriaSchema(SimulacaoInterfaceSchema):
     """Representa os dados que fazem parte do input do usuário para a simulação
     de um produto do tipo aposentadoria."""
 
-    sexo: str = "M"
-    data_nascimento: date = date(1990, 1, 1)
-    prazo: int = 10
     prazo_renda: int = 10
     prazo_certo_renda: int = 0
-    produto_id: int = 1
-    beneficio: float = 10000
 
 
 class ResultadoSimulacaoSchema(BaseModel):

@@ -103,8 +103,7 @@ def get_produtos():
 def get_parametros_produto(path: ProdutoBuscaSchema):
     """Faz a busca pelos parâmetros de um produto específico.
 
-    Retorna os prazos e os prazos de renda e renda certa disponíveis para contratação
-    e a fórmula utilizada para simulação.
+    Retorna os possíveis parâmetros de contratação de um produto específico.
     """
     try:
         beneficio, prazos, prazos_renda = pegar_parametros_produto(db, path.produto_id)
