@@ -24,6 +24,7 @@ from schemas.produto import (
     ParametrosProdutoSchema,
     PrazoRendaSchema,
     ProdutoBuscaSchema,
+    ProdutoSchema,
 )
 from schemas.simulacao import (
     ResultadoSimulacaoSchema,
@@ -97,6 +98,29 @@ def get_produtos():
 
 @app.get(
     "/produtos/<int:produto_id>",
+    tags=[produto_tag],
+    responses={"200": ProdutoSchema, "404": ErrorSchema},
+)
+def get_produto(path: ProdutoBuscaSchema):
+    """Faz a busca por todos os produto cadastrados.
+
+    Retorna uma representação da listagem de produtos.
+    """
+    produto = db.session.execute(
+        db.select(Produto).where(Produto.id == path.produto_id)
+    ).scalar()
+
+    result = {
+        "id": produto.id,
+        "nome": produto.nome,
+        "descricao": produto.descricao,
+    }
+
+    return ProdutoSchema(**result).model_dump(), 200
+
+
+@app.get(
+    "/produtos/parametros/<int:produto_id>",
     tags=[produto_tag],
     responses={"200": ParametrosProdutoSchema, "404": ErrorSchema},
 )
