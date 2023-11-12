@@ -168,9 +168,12 @@ def add_cliente(form: ClienteSchema):
     Retorna as informações do cliente adicionado.
     """
     segurado = db.session.query(Segurado).filter_by(cpf=form.cpf).first()
+    print(segurado)
     if not segurado:
         segurado = Segurado(
             cpf=form.cpf,
+            nome=form.nome,
+            email=form.email,
             sexo=form.sexo,
             dataNascimento=form.data_nascimento,
         )

@@ -7,6 +7,8 @@ class ClienteSchema(BaseModel):
     """Define a visualização de uma matrícula."""
 
     cpf: int = 00000000000
+    nome: str = "Jose da Silva"
+    email: str = "jsilva@email.com"
     sexo: str = "M"
     data_nascimento: date = date(1990, 10, 29)
     produto_id: int = 1

@@ -35,8 +35,8 @@ def init_db(db):
         cpf=12345678900,
         sexo="M",
         dataNascimento=date(1990, 1, 1),
-        # nome="Jose da Silva",
-        # email="jose@email.com",
+        nome="Jose da Silva",
+        email="jose@email.com",
     )
 
     produtos = [

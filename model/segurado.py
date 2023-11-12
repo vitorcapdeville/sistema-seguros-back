@@ -10,6 +10,8 @@ from model.produto import ProdutoPrazo
 class Segurado(db.Model):
     __tablename__ = "segurado"
     cpf: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String(100))
+    email: Mapped[str] = mapped_column(String(100))
     sexo: Mapped[str] = mapped_column(String(1))
     dataNascimento: Mapped[date]
 
