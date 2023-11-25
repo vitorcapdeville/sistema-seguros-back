@@ -19,7 +19,7 @@ class ListagemProdutosSchema(RootModel):
 
 class ProdutoBuscaSchema(BaseModel):
     """Define como deve ser a estrutura que representa a busca, que será
-    feita apenas com base no nome do produto.
+    feita apenas com base no id do produto.
     """
 
     produto_id: int = 1
