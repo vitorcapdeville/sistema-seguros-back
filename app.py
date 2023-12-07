@@ -200,7 +200,7 @@ def add_cliente(form: ClienteSchema):
         return ErrorSchema(message=e).model_dump(), 400
 
 
-@app.get(
+@app.post(
     "/simular",
     tags=[simular_tag],
     responses={
@@ -209,7 +209,7 @@ def add_cliente(form: ClienteSchema):
         "404": ErrorSchema,
     },
 )
-def get_simulacao(query: SimulacaoSchema):
+def post_simulacao(form: SimulacaoSchema):
     """Faz a simulação de um produto genérico.
 
     Essa rota recebe um produto e um conjunto de parâmetros e redireciona para a rota
@@ -217,34 +217,34 @@ def get_simulacao(query: SimulacaoSchema):
     serão utilizados.
     """
     try:
-        formula = pegar_formula(db, query.produto_id)
+        formula = pegar_formula(db, form.produto_id)
     except NoResultFound:
         return (
             ErrorSchema(
-                mesage=f"Produto {query.produto_id} não encontrado."
+                mesage=f"Produto {form.produto_id} não encontrado."
             ).model_dump(),
             404,
         )
-    return redirect(url_for(f"get_simulacao_{formula.nome}", **query.model_dump()))
+    return redirect(url_for(f"post_simulacao_{formula.nome}"), code=307)
 
 
-@app.get(
+@app.post(
     "/simular/peculio",
     tags=[simular_tag],
     responses={"200": ResultadoSimulacaoSchema, "400": ErrorSchema, "404": ErrorSchema},
 )
-def get_simulacao_peculio(query: SimulacaoPeculioSchema):
+def post_simulacao_peculio(form: SimulacaoPeculioSchema):
     """Faz a simulação de um produto do tipo pecúlio.
 
     Retorna o valor do prêmio comercial para o produto e os parâmetros informados."""
     try:
-        juros = pegar_juros(db, query.produto_id, query.prazo)
-        taxa = pegar_taxas(db, query.produto_id, query.sexo, "Sinistro")
-        taxa_dpi = pegar_taxas(db, query.produto_id, query.sexo, "DPI")
+        juros = pegar_juros(db, form.produto_id, form.prazo)
+        taxa = pegar_taxas(db, form.produto_id, form.sexo, "Sinistro")
+        taxa_dpi = pegar_taxas(db, form.produto_id, form.sexo, "DPI")
     except NoResultFound:
         return (
             ErrorSchema(
-                mesage=f"Produto {query.produto_id} não encontrado."
+                mesage=f"Produto {form.produto_id} não encontrado."
             ).model_dump(),
             404,
         )
@@ -262,10 +262,10 @@ def get_simulacao_peculio(query: SimulacaoPeculioSchema):
             tabua_pagamento=tabua_pagamento,
             juros=tb.JurosConstante(juros),
             data_assinatura=date.today(),
-            data_nascimento_segurado=query.data_nascimento,
-            prazo_cobertura=query.prazo,
-            prazo_pagamento=query.prazo,
-            beneficio=query.beneficio,
+            data_nascimento_segurado=form.data_nascimento,
+            prazo_cobertura=form.prazo,
+            prazo_pagamento=form.prazo,
+            beneficio=form.beneficio,
             percentual_beneficio=[1.0],
         )
 
@@ -278,23 +278,23 @@ def get_simulacao_peculio(query: SimulacaoPeculioSchema):
     )
 
 
-@app.get(
+@app.post(
     "/simular/aposentadoria",
     tags=[simular_tag],
     responses={"200": ResultadoSimulacaoSchema, "400": ErrorSchema, "404": ErrorSchema},
 )
-def get_simulacao_aposentadoria(query: SimulacaoAposentadoriaSchema):
+def post_simulacao_aposentadoria(form: SimulacaoAposentadoriaSchema):
     """Faz a simulação de um produto do tipo aposentadoria.
 
     Retorna o valor do prêmio comercial para o produto e os parâmetros informados."""
     try:
-        juros = pegar_juros(db, query.produto_id, query.prazo)
-        taxa_acumulacao = pegar_taxas(db, query.produto_id, query.sexo, "Acumulacao")
-        taxa_concessao = pegar_taxas(db, query.produto_id, query.sexo, "Concessao")
+        juros = pegar_juros(db, form.produto_id, form.prazo)
+        taxa_acumulacao = pegar_taxas(db, form.produto_id, form.sexo, "Acumulacao")
+        taxa_concessao = pegar_taxas(db, form.produto_id, form.sexo, "Concessao")
     except NoResultFound:
         return (
             ErrorSchema(
-                mesage=f"Produto {query.produto_id} não encontrado."
+                mesage=f"Produto {form.produto_id} não encontrado."
             ).model_dump(),
             404,
         )
@@ -305,12 +305,12 @@ def get_simulacao_aposentadoria(query: SimulacaoAposentadoriaSchema):
             tabua_concessao=tb.Tabua(taxa_concessao),
             juros=tb.JurosConstante(juros),
             data_assinatura=date.today(),
-            data_nascimento_segurado=query.data_nascimento,
-            prazo_cobertura=query.prazo,
-            prazo_pagamento=query.prazo,
-            prazo_renda=query.prazo_renda,
-            prazo_certo_renda=query.prazo_certo_renda,
-            beneficio=query.beneficio,
+            data_nascimento_segurado=form.data_nascimento,
+            prazo_cobertura=form.prazo,
+            prazo_pagamento=form.prazo,
+            prazo_renda=form.prazo_renda,
+            prazo_certo_renda=form.prazo_certo_renda,
+            beneficio=form.beneficio,
             percentual_beneficio=[1.0],
         )
     except Exception as e:
