@@ -102,9 +102,9 @@ def get_produtos():
     responses={"200": ProdutoSchema, "404": ErrorSchema},
 )
 def get_produto(path: ProdutoBuscaSchema):
-    """Faz a busca por todos os produto cadastrados.
+    """Faz a busca por um produto específico.
 
-    Retorna uma representação da listagem de produtos.
+    Retorna uma representação do produtos.
     """
     produto = db.session.execute(
         db.select(Produto).where(Produto.id == path.produto_id)
