@@ -1,7 +1,10 @@
 # Sistema seguros
 
-O sistema de seguros é um aplicativo web para gerenciamento de seguros de vida. O sistema expõe uma API REST para simulação do preço de um seguro de vida de diversos tipos.
-A API expõe rotas que retornam os possíveis parâmetros de contratação para diferentes tipos de seguro de vida para facilitar a exibição apenas de parâmetros válidos no front-end, realiza o cálculo do preço do seguro e permite o cadastro do segurado.
+O sistema de seguros é um aplicativo web para gerenciamento de seguros de vida. 
+A API é composta por rotas que permitem a consulta de produtos existentes, simulação de preços e cadastro de novos clientes e apólices.
+É possível consultar quais são os possíveis parâmetros de contratação de um seguro, fazendo com que o front-end consiga exibir apenas opções válidas em cada tipo de seguro.
+A rota de simulação também permite o rápido feedback do valor de contração, e atualiza em tempo real conforme o usuário altera os parâmetros do produto.
+Por fim, a rota de cadastro de clientes e apólices permite que o usuário efetive a contratação do seguro e seja registrado no banco de dados.
 
 O cálculo do preço do seguro é feito em python com um esquema próprio de classes que abstrai o contrato de seguro de vida e permite a criação de novos tipos de seguro de forma simples e rápida, apenas modificando componentes.
 
